@@ -5,20 +5,19 @@ from aiogram.filters import CommandStart
 import asyncio
 
 # Укажите ваш токен бота
-BOT_TOKEN = "7945799403:AAGcc9M7l5J44V8FIcicudeUQXyqJFh87Ss"
+BOT_TOKEN = "YOUR_BOT_TOKEN"
 
 # ID канала для проверки подписки
-CHECK_CHANNEL = "@Nuqor"
-TARGET_CHANNEL = "https://t.me/Films_Film_Films"
+CHECK_CHANNEL = "@YourChannel"
+TARGET_CHANNEL = "https://t.me/YourTargetChannel"
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
 
-# Создание объекта бота
+# Создание объекта бота и диспетчера
 bot = Bot(token=BOT_TOKEN)
-
-# Создание объекта Dispatcher
-dp = Dispatcher(bot)
+dp = Dispatcher()
+bot.set_dispatcher(dp)
 
 # Клавиатура с кнопкой проверки подписки
 check_keyboard = InlineKeyboardMarkup(inline_keyboard=[
@@ -26,7 +25,7 @@ check_keyboard = InlineKeyboardMarkup(inline_keyboard=[
 ])
 
 # Стартовое сообщение
-@dp.message_handler(commands=['start'])
+@dp.message(CommandStart())
 async def start_command(message: types.Message):
     """Обрабатывает команду /start"""
     await message.answer(
@@ -36,7 +35,7 @@ async def start_command(message: types.Message):
     )
 
 # Проверка подписки
-@dp.callback_query_handler(lambda c: c.data == "check_subscription")
+@dp.callback_query(lambda c: c.data == "check_subscription")
 async def check_subscription(callback_query: types.CallbackQuery):
     """Проверяет подписку пользователя"""
     user_id = callback_query.from_user.id
@@ -64,7 +63,7 @@ async def on_start():
     logging.info("Removing webhook if exists...")
     await remove_webhook()
     logging.info("Bot started!")
-    await dp.start_polling()
+    await dp.start_polling(bot)
 
 if __name__ == "__main__":
     asyncio.run(on_start())
