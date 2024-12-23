@@ -17,8 +17,8 @@ logging.basicConfig(level=logging.INFO)
 # Создание объекта бота
 bot = Bot(token=BOT_TOKEN)
 
-# Создание диспетчера с использованием метода from_types
-dp = Dispatcher.from_types(Bot, types.Message)
+# Создание диспетчера
+dp = Dispatcher(bot)
 
 # Клавиатура с кнопкой проверки подписки
 check_keyboard = InlineKeyboardMarkup(inline_keyboard=[
