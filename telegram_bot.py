@@ -8,7 +8,7 @@ import asyncio
 BOT_TOKEN = "7945799403:AAGcc9M7l5J44V8FIcicudeUQXyqJFh87Ss"
 
 # ID канала для проверки подписки
-CHECK_CHANNEL = "https://t.me/Nuqor"  # Замените на актуальный канал
+CHECK_CHANNEL = "@Nuqor"  # Замените на актуальный канал
 TARGET_CHANNEL = "https://t.me/YourTargetChannel"  # Замените на нужный канал
 
 # Настройка логирования
