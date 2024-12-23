@@ -7,7 +7,7 @@ import asyncio
 # Укажите ваш токен бота
 BOT_TOKEN = "7945799403:AAGcc9M7l5J44V8FIcicudeUQXyqJFh87Ss"
 
-# Ссылка на канал для проверки подписки (полная ссылка)
+# Ссылка на канал для проверки подписки
 CHECK_CHANNEL = "https://t.me/Nuqor"  # Замените на актуальную ссылку канала
 TARGET_CHANNEL = "https://t.me/Films_Film_Films"  # Замените на нужный канал
 
@@ -27,17 +27,16 @@ check_keyboard = InlineKeyboardMarkup(inline_keyboard=[
 @dp.message(CommandStart())
 async def start_command(message: types.Message):
     """Обрабатывает команду /start"""
-    # Сначала отправляется ссылка на канал
-    await message.answer(
-        f"Привет! Чтобы получить доступ к интересному контенту, подпишитесь на наш канал.\n\n"
-        "После подписки нажмите на кнопку ниже, чтобы проверить.",
-    )
-    # Отправка ссылки на канал
-    await message.answer(f"Вот ссылка на канал: {CHECK_CHANNEL}\nПожалуйста, подпишитесь!")
+    user_name = message.from_user.first_name  # Получаем имя пользователя
 
-    # И добавляем кнопку для проверки подписки
+    # Приветственное сообщение
     await message.answer(
-        "После подписки нажмите на кнопку ниже, чтобы проверить.",
+        f"Привет, {user_name}! Чтобы получить доступ к фильмам, подпишись на канал."
+    )
+
+    # Отправка ссылки на канал
+    await message.answer(
+        f"Вот ссылка на канал: {CHECK_CHANNEL}\nПожалуйста, подпишись!",
         reply_markup=check_keyboard
     )
 
@@ -47,7 +46,7 @@ async def check_subscription(callback_query: types.CallbackQuery):
     """Проверяет подписку пользователя по юзернейму канала"""
     user_id = callback_query.from_user.id
     try:
-        # Проверка подписки по юзернейму канала (первый параметр - это @канал)
+        # Проверка подписки по юзернейму канала
         member = await bot.get_chat_member(chat_id="@Nuqor", user_id=user_id)
 
         if member.status in ["member", "administrator", "creator"]:
