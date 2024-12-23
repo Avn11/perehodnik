@@ -23,7 +23,7 @@ dp = Dispatcher(bot)
 
 # Клавиатура с кнопкой проверки подписки
 check_keyboard = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text="✅ Подписался, спасибо!", callback_data="check_subscription")]
+    [InlineKeyboardButton(text="✅ Подписался.", callback_data="check_subscription")]
 ])
 
 # Стартовое сообщение
@@ -49,12 +49,12 @@ async def check_subscription(callback_query: types.CallbackQuery):
         if member.status in ["member", "administrator", "creator"]:
             # Если пользователь подписан
             await callback_query.message.answer(
-                f"🎉 Отлично! Вот ваша ссылка на канал с фильмами: {TARGET_CHANNEL}"
+                f"🎉 Отлично! Вот тыоя ссылка на канал с фильмами: {TARGET_CHANNEL}"
             )
         else:
             # Если пользователь не подписан
             await callback_query.message.answer(
-                f"Вы не подписаны на канал {CHECK_CHANNEL}. Пожалуйста, подпишитесь и попробуйте снова: {RETRY_CHANNEL}",
+                f"Ты не подписаны на канал {CHECK_CHANNEL}. Пожалуйста, подпишись и попробуй снова: {RETRY_CHANNEL}",
                 reply_markup=check_keyboard
             )
     except Exception as e:
