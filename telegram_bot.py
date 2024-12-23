@@ -2,8 +2,8 @@ import logging
 from aiogram import Bot, Dispatcher, types
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.filters import CommandStart
-import asyncio
 from aiohttp import web
+import asyncio
 
 # Укажите ваш токен бота
 BOT_TOKEN = "7945799403:AAGcc9M7l5J44V8FIcicudeUQXyqJFh87Ss"
@@ -28,15 +28,11 @@ check_keyboard = InlineKeyboardMarkup(inline_keyboard=[
 @dp.message(CommandStart())
 async def start_command(message: types.Message):
     """Обрабатывает команду /start"""
-    # Сначала отправляется ссылка на канал
     await message.answer(
         f"Привет {message.from_user.username}, чтобы получить доступ к фильмам подпишись на канал.\n\n"
         "После подписки нажмите на кнопку ниже, чтобы проверить.",
     )
-    # Отправка ссылки на канал
     await message.answer(f"Вот ссылка на канал: {CHECK_CHANNEL}\nПожалуйста, подпишитесь!")
-
-    # И добавляем кнопку для проверки подписки
     await message.answer(
         "После подписки нажмите на кнопку ниже, чтобы проверить.",
         reply_markup=check_keyboard
@@ -45,58 +41,53 @@ async def start_command(message: types.Message):
 # Проверка подписки
 @dp.callback_query(lambda c: c.data == "check_subscription")
 async def check_subscription(callback_query: types.CallbackQuery):
-    """Проверяет подписку пользователя по юзернейму канала"""
     user_id = callback_query.from_user.id
     try:
-        # Проверка подписки по юзернейму канала (первый параметр - это @канал)
         member = await bot.get_chat_member(chat_id="@Nuqor", user_id=user_id)
-
         if member.status in ["member", "administrator", "creator"]:
-            # Если пользователь подписан
             await callback_query.message.answer(
                 f"🎉 Отлично! Вот ваша ссылка на целевой канал: {TARGET_CHANNEL}"
             )
         else:
-            # Если пользователь не подписан
             await callback_query.message.answer(
                 f"Вы не подписаны на канал {CHECK_CHANNEL}.\nПожалуйста, подпишитесь и попробуйте снова.",
                 reply_markup=check_keyboard
             )
     except Exception as e:
-        # Логирование ошибки
         logging.error(f"Ошибка при проверке подписки для пользователя {user_id}: {str(e)}")
         await callback_query.message.answer(
-            "Вы не подписались. Попробуйте еще раз."
+            "Произошла ошибка. Попробуйте снова."
         )
 
 # Удаление webhook
 async def remove_webhook():
-    """Удалить webhook, если он был установлен"""
     await bot.delete_webhook()
 
-# Запуск бота с вебхуком
-async def on_start():
+# Запуск aiohttp
+async def start_bot():
     logging.info("Removing webhook if exists...")
     await remove_webhook()
 
-    # Установка вебхука
     webhook_url = "https://perehodnik-c7t4.onrender.com/webhook"
     logging.info(f"Устанавливаем Webhook по адресу: {webhook_url}")
     await bot.set_webhook(webhook_url)
 
     logging.info("Bot started!")
-    # Запускаем aiohttp для обработки запросов
     app = web.Application()
 
-    # Настроим хэндлер для обработки вебхука
-    async def webhook(request):
+    async def webhook_handler(request):
         json_str = await request.json()
         update = types.Update(**json_str)
         await dp.process_update(update)
         return web.Response()
 
-    app.router.add_post('/webhook', webhook)  # Устанавливаем обработчик для вебхука
-    web.run_app(app, host="0.0.0.0", port=80)
+    app.router.add_post('/webhook', webhook_handler)
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, host="0.0.0.0", port=80)
+    await site.start()
 
 if __name__ == "__main__":
-    asyncio.run(on_start())
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(start_bot())
+    loop.run_forever()
