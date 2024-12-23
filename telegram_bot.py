@@ -2,14 +2,19 @@ import logging
 from aiogram import Bot, Dispatcher, types
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.filters import CommandStart
-import asyncio
+from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
+from aiohttp import web
+import os
 
 # Укажите ваш токен бота
 BOT_TOKEN = "7945799403:AAGcc9M7l5J44V8FIcicudeUQXyqJFh87Ss"
+WEBHOOK_PATH = "/webhook"  # Путь Webhook
+WEBAPP_HOST = "0.0.0.0"  # Хост для сервера
+WEBAPP_PORT = int(os.getenv("PORT", 3000))  # Порт для сервера
 
 # Ссылка на канал для проверки подписки
-CHECK_CHANNEL = "https://t.me/Nuqor"  # Замените на актуальную ссылку канала
-TARGET_CHANNEL = "https://t.me/Films_Film_Films"  # Замените на нужный канал
+CHECK_CHANNEL = "https://t.me/Nuqor"
+TARGET_CHANNEL = "https://t.me/Films_Film_Films"
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
@@ -26,10 +31,7 @@ check_keyboard = InlineKeyboardMarkup(inline_keyboard=[
 # Стартовое сообщение
 @dp.message(CommandStart())
 async def start_command(message: types.Message):
-    """Обрабатывает команду /start"""
-    user_name = message.from_user.first_name  # Получаем имя пользователя
-
-    # Приветственное сообщение с ссылкой на канал и кнопкой проверки подписки
+    user_name = message.from_user.first_name
     await message.answer(
         f"Привет, {user_name}! Чтобы получить доступ к фильмам, подпишись на канал:\n\n"
         f"{CHECK_CHANNEL}\n\n"
@@ -40,41 +42,34 @@ async def start_command(message: types.Message):
 # Проверка подписки
 @dp.callback_query(lambda c: c.data == "check_subscription")
 async def check_subscription(callback_query: types.CallbackQuery):
-    """Проверяет подписку пользователя по юзернейму канала"""
     user_id = callback_query.from_user.id
     try:
-        # Проверка подписки по юзернейму канала
         member = await bot.get_chat_member(chat_id="@Nuqor", user_id=user_id)
-
         if member.status in ["member", "administrator", "creator"]:
-            # Если пользователь подписан
             await callback_query.message.answer(
                 f"🎉 Отлично! Вот ваша ссылка на целевой канал: {TARGET_CHANNEL}"
             )
         else:
-            # Если пользователь не подписан
             await callback_query.message.answer(
                 f"Вы не подписаны на канал {CHECK_CHANNEL}.\nПожалуйста, подпишитесь и попробуйте снова.",
                 reply_markup=check_keyboard
             )
     except Exception as e:
-        # Логирование ошибки
         logging.error(f"Ошибка при проверке подписки для пользователя {user_id}: {str(e)}")
-        await callback_query.message.answer(
-            "Вы не подписались. Попробуйте еще раз."
-        )
+        await callback_query.message.answer("Вы не подписались. Попробуйте еще раз.")
 
-# Удаление webhook
-async def remove_webhook():
-    """Удалить webhook, если он был установлен"""
+# Настройка Webhook
+async def on_startup(app):
+    await bot.set_webhook(url=f"https://{os.getenv('RENDER_EXTERNAL_HOST')}{WEBHOOK_PATH}")
+
+async def on_shutdown(app):
     await bot.delete_webhook()
 
-# Запуск бота
-async def on_start():
-    logging.info("Removing webhook if exists...")
-    await remove_webhook()
-    logging.info("Bot started!")
-    await dp.start_polling(bot)
+# Создание веб-приложения
+app = web.Application()
+app.on_startup.append(on_startup)
+app.on_shutdown.append(on_shutdown)
+SimpleRequestHandler(dispatcher=dp, bot=bot).register(app, path=WEBHOOK_PATH)
 
 if __name__ == "__main__":
-    asyncio.run(on_start())
+    web.run_app(app, host=WEBAPP_HOST, port=WEBAPP_PORT)
