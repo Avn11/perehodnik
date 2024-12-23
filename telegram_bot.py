@@ -1,4 +1,3 @@
-import os
 import logging
 from aiogram import Bot, Dispatcher, types
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
@@ -18,8 +17,8 @@ logging.basicConfig(level=logging.INFO)
 # Создание объекта бота
 bot = Bot(token=BOT_TOKEN)
 
-# Правильная инициализация диспетчера
-dp = Dispatcher(bot)
+# Правильная инициализация диспетчера с использованием from_types
+dp = Dispatcher.from_types(Bot)
 
 # Клавиатура с кнопкой проверки подписки
 check_keyboard = InlineKeyboardMarkup(inline_keyboard=[
@@ -69,5 +68,4 @@ async def on_start():
 
 if __name__ == "__main__":
     # Важно использовать правильный порт
-    port = int(os.getenv("PORT", 8080))  # Порт будет взят из переменной окружения
     asyncio.run(on_start())
