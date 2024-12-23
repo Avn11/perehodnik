@@ -18,7 +18,7 @@ logging.basicConfig(level=logging.INFO)
 bot = Bot(token=BOT_TOKEN)
 
 # Создание объекта Dispatcher
-dp = Dispatcher()
+dp = Dispatcher(bot)
 
 # Клавиатура с кнопкой проверки подписки
 check_keyboard = InlineKeyboardMarkup(inline_keyboard=[
@@ -64,7 +64,7 @@ async def on_start():
     logging.info("Removing webhook if exists...")
     await remove_webhook()
     logging.info("Bot started!")
-    await dp.start_polling(bot)
+    await dp.start_polling()
 
 if __name__ == "__main__":
     asyncio.run(on_start())
