@@ -9,7 +9,7 @@ BOT_TOKEN = "7945799403:AAGcc9M7l5J44V8FIcicudeUQXyqJFh87Ss"
 
 # Ссылка на канал для проверки подписки (полная ссылка)
 CHECK_CHANNEL = "https://t.me/Nuqor"  # Замените на актуальную ссылку канала
-TARGET_CHANNEL = "https://t.me/YourTargetChannel"  # Замените на нужный канал
+TARGET_CHANNEL = "https://t.me/Films_Film_Films"  # Замените на нужный канал
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
@@ -29,7 +29,7 @@ async def start_command(message: types.Message):
     """Обрабатывает команду /start"""
     # Сначала отправляется ссылка на канал
     await message.answer(
-        f"Привет! Чтобы получить доступ к интересному контенту, подпишитесь на наш канал: {CHECK_CHANNEL}.\n\n"
+        f"Привет! Чтобы получить доступ к интересному контенту, подпишитесь на наш канал:.\n\n"
         "После подписки нажмите на кнопку ниже, чтобы проверить.",
     )
     # Отправка ссылки на канал
@@ -48,7 +48,7 @@ async def check_subscription(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
     try:
         # Проверка подписки по юзернейму канала (первый параметр - это @канал)
-        member = await bot.get_chat_member(chat_id="Nuqor", user_id=user_id)
+        member = await bot.get_chat_member(chat_id="@Nuqor", user_id=user_id)
 
         if member.status in ["member", "administrator", "creator"]:
             # Если пользователь подписан
@@ -65,7 +65,7 @@ async def check_subscription(callback_query: types.CallbackQuery):
         # Логирование ошибки
         logging.error(f"Ошибка при проверке подписки для пользователя {user_id}: {str(e)}")
         await callback_query.message.answer(
-            "Произошла ошибка при проверке подписки. Попробуйте позже."
+            "Вы не подписались. Попробуйте еще раз."
         )
 
 # Удаление webhook
