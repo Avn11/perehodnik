@@ -17,8 +17,8 @@ logging.basicConfig(level=logging.INFO)
 # Создание объекта бота
 bot = Bot(token=BOT_TOKEN)
 
-# Создание диспетчера
-dp = Dispatcher(bot)
+# Создание диспетчера с передачей бота как аргумент
+dp = Dispatcher()
 
 # Клавиатура с кнопкой проверки подписки
 check_keyboard = InlineKeyboardMarkup(inline_keyboard=[
