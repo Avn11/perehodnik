@@ -29,14 +29,11 @@ async def start_command(message: types.Message):
     """Обрабатывает команду /start"""
     user_name = message.from_user.first_name  # Получаем имя пользователя
 
-    # Приветственное сообщение
+    # Приветственное сообщение с ссылкой на канал и кнопкой проверки подписки
     await message.answer(
-        f"Привет, {user_name}! Чтобы получить доступ к фильмам, подпишись на канал."
-    )
-
-    # Отправка ссылки на канал
-    await message.answer(
-        f"Вот ссылка на канал: {CHECK_CHANNEL}\nПожалуйста, подпишись!",
+        f"Привет, {user_name}! Чтобы получить доступ к фильмам, подпишись на канал:\n\n"
+        f"{CHECK_CHANNEL}\n\n"
+        "После подписки нажми на кнопку ниже, чтобы проверить.",
         reply_markup=check_keyboard
     )
 
