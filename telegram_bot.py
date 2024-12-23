@@ -17,7 +17,6 @@ logging.basicConfig(level=logging.INFO)
 # Создание объекта бота и диспетчера
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
-bot.set_dispatcher(dp)
 
 # Клавиатура с кнопкой проверки подписки
 check_keyboard = InlineKeyboardMarkup(inline_keyboard=[
