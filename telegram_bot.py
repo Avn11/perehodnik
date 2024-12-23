@@ -96,7 +96,10 @@ async def on_start():
         return web.Response()
 
     app.router.add_post('/webhook', webhook)  # Устанавливаем обработчик для вебхука
+
+    # Заменим asyncio.run() на метод запуска в текущем цикле событий
     web.run_app(app, host="0.0.0.0", port=80)
 
 if __name__ == "__main__":
-    asyncio.run(on_start())
+    # Запуск асинхронного события без asyncio.run()
+    on_start()
