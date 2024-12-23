@@ -14,11 +14,9 @@ TARGET_CHANNEL = "https://t.me/YourTargetChannel"  # Замените на ну�
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
 
-# Создание объекта бота
+# Создание объекта бота и диспетчера
 bot = Bot(token=BOT_TOKEN)
-
-# Создание диспетчера с использованием метода from_types
-dp = Dispatcher.from_types(Bot, types.Message)
+dp = Dispatcher()
 
 # Клавиатура с кнопкой проверки подписки
 check_keyboard = InlineKeyboardMarkup(inline_keyboard=[
