@@ -2,22 +2,23 @@ import logging
 from aiogram import Bot, Dispatcher, types
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.filters import CommandStart
-from aiohttp import web
 import asyncio
 
 # Укажите ваш токен бота
 BOT_TOKEN = "7945799403:AAGcc9M7l5J44V8FIcicudeUQXyqJFh87Ss"
 
-# Ссылка на канал для проверки подписки (полная ссылка)
-CHECK_CHANNEL = "https://t.me/Nuqor"  # Замените на актуальную ссылку канала
-TARGET_CHANNEL = "https://t.me/Films_Film_Films"  # Замените на нужный канал
+# ID канала для проверки подписки
+CHECK_CHANNEL = "https://t.me/Nuqor"  # Замените на актуальный канал
+TARGET_CHANNEL = "https://t.me/YourTargetChannel"  # Замените на нужный канал
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
 
-# Создание объекта бота и диспетчера
+# Создание объекта бота
 bot = Bot(token=BOT_TOKEN)
-dp = Dispatcher()
+
+# Создание диспетчера с использованием метода from_types
+dp = Dispatcher.from_types(Bot, types.Message)
 
 # Клавиатура с кнопкой проверки подписки
 check_keyboard = InlineKeyboardMarkup(inline_keyboard=[
@@ -29,11 +30,7 @@ check_keyboard = InlineKeyboardMarkup(inline_keyboard=[
 async def start_command(message: types.Message):
     """Обрабатывает команду /start"""
     await message.answer(
-        f"Привет {message.from_user.username}, чтобы получить доступ к фильмам подпишись на канал.\n\n"
-        "После подписки нажмите на кнопку ниже, чтобы проверить.",
-    )
-    await message.answer(f"Вот ссылка на канал: {CHECK_CHANNEL}\nПожалуйста, подпишитесь!")
-    await message.answer(
+        f"Привет! Чтобы получить доступ к интересному контенту, подпишитесь на наш канал: {CHECK_CHANNEL}.\n\n"
         "После подписки нажмите на кнопку ниже, чтобы проверить.",
         reply_markup=check_keyboard
     )
@@ -41,53 +38,41 @@ async def start_command(message: types.Message):
 # Проверка подписки
 @dp.callback_query(lambda c: c.data == "check_subscription")
 async def check_subscription(callback_query: types.CallbackQuery):
+    """Проверяет подписку пользователя"""
     user_id = callback_query.from_user.id
     try:
-        member = await bot.get_chat_member(chat_id="@Nuqor", user_id=user_id)
+        # Проверка подписки
+        member = await bot.get_chat_member(chat_id=CHECK_CHANNEL, user_id=user_id)
+
         if member.status in ["member", "administrator", "creator"]:
+            # Если пользователь подписан
             await callback_query.message.answer(
-                f"🎉 Отлично! Вот ваша ссылка на целевой канал: {TARGET_CHANNEL}"
+                f"🎉 Отлично! Вот ваша ссылка: {TARGET_CHANNEL}"
             )
         else:
+            # Если пользователь не подписан
             await callback_query.message.answer(
                 f"Вы не подписаны на канал {CHECK_CHANNEL}.\nПожалуйста, подпишитесь и попробуйте снова.",
                 reply_markup=check_keyboard
             )
     except Exception as e:
-        logging.error(f"Ошибка при проверке подписки для пользователя {user_id}: {str(e)}")
+        # Если произошла ошибка, например, канал не найден
+        logging.error(f"Ошибка при проверке подписки: {str(e)}")
         await callback_query.message.answer(
-            "Произошла ошибка. Попробуйте снова."
+            "Произошла ошибка при проверке подписки. Попробуйте позже."
         )
 
 # Удаление webhook
 async def remove_webhook():
+    """Удалить webhook, если он был установлен"""
     await bot.delete_webhook()
 
-# Запуск aiohttp
-async def start_bot():
+# Запуск бота
+async def on_start():
     logging.info("Removing webhook if exists...")
     await remove_webhook()
-
-    webhook_url = "https://perehodnik-c7t4.onrender.com/webhook"
-    logging.info(f"Устанавливаем Webhook по адресу: {webhook_url}")
-    await bot.set_webhook(webhook_url)
-
     logging.info("Bot started!")
-    app = web.Application()
-
-    async def webhook_handler(request):
-        json_str = await request.json()
-        update = types.Update(**json_str)
-        await dp.process_update(update)
-        return web.Response()
-
-    app.router.add_post('/webhook', webhook_handler)
-    runner = web.AppRunner(app)
-    await runner.setup()
-    site = web.TCPSite(runner, host="0.0.0.0", port=80)
-    await site.start()
+    await dp.start_polling(bot)
 
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(start_bot())
-    loop.run_forever()
+    asyncio.run(on_start())
