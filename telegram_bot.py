@@ -8,8 +8,8 @@ import asyncio
 BOT_TOKEN = "7945799403:AAGcc9M7l5J44V8FIcicudeUQXyqJFh87Ss"
 
 # ID канала для проверки подписки
-CHECK_CHANNEL = "@YourChannel"
-TARGET_CHANNEL = "https://t.me/YourTargetChannel"
+CHECK_CHANNEL = "https://t.me/Nuqor"  # Замените на актуальный канал
+TARGET_CHANNEL = "https://t.me/YourTargetChannel"  # Замените на нужный канал
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
@@ -38,18 +38,26 @@ async def start_command(message: types.Message):
 async def check_subscription(callback_query: types.CallbackQuery):
     """Проверяет подписку пользователя"""
     user_id = callback_query.from_user.id
-    member = await bot.get_chat_member(chat_id=CHECK_CHANNEL, user_id=user_id)
+    try:
+        # Проверка подписки
+        member = await bot.get_chat_member(chat_id=CHECK_CHANNEL, user_id=user_id)
 
-    if member.status in ["member", "administrator", "creator"]:
-        # Если пользователь подписан
+        if member.status in ["member", "administrator", "creator"]:
+            # Если пользователь подписан
+            await callback_query.message.answer(
+                f"🎉 Отлично! Вот ваша ссылка: {TARGET_CHANNEL}"
+            )
+        else:
+            # Если пользователь не подписан
+            await callback_query.message.answer(
+                f"Вы не подписаны на канал {CHECK_CHANNEL}.\nПожалуйста, подпишитесь и попробуйте снова.",
+                reply_markup=check_keyboard
+            )
+    except Exception as e:
+        # Если произошла ошибка, например, канал не найден
+        logging.error(f"Ошибка при проверке подписки: {str(e)}")
         await callback_query.message.answer(
-            f"🎉 Отлично! Вот ваша ссылка: {TARGET_CHANNEL}"
-        )
-    else:
-        # Если пользователь не подписан
-        await callback_query.message.answer(
-            f"Вы не подписаны на канал {CHECK_CHANNEL}.\nПожалуйста, подпишитесь и попробуйте снова.",
-            reply_markup=check_keyboard
+            "Произошла ошибка при проверке подписки. Попробуйте позже."
         )
 
 # Удаление webhook
