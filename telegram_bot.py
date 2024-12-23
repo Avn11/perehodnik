@@ -15,8 +15,10 @@ TARGET_CHANNEL = "https://t.me/Films_Film_Films"
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
 
-# Создание объекта бота и диспетчера
+# Создание объекта бота
 bot = Bot(token=BOT_TOKEN)
+
+# Правильная инициализация диспетчера
 dp = Dispatcher(bot)
 
 # Клавиатура с кнопкой проверки подписки
@@ -63,7 +65,6 @@ async def on_start():
     logging.info("Removing webhook if exists...")
     await remove_webhook()
     logging.info("Bot started!")
-    # Важно: запуск polling для асинхронного бота
     await dp.start_polling()
 
 if __name__ == "__main__":
