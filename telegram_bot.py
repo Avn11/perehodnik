@@ -87,7 +87,15 @@ async def on_start():
     logging.info("Bot started!")
     # Запускаем aiohttp для обработки запросов
     app = web.Application()
-    app.router.add_post('/webhook', dp.webhook_handler)  # Устанавливаем обработчик для вебхука
+
+    # Настроим хэндлер для обработки вебхука
+    async def webhook(request):
+        json_str = await request.json()
+        update = types.Update(**json_str)
+        await dp.process_update(update)
+        return web.Response()
+
+    app.router.add_post('/webhook', webhook)  # Устанавливаем обработчик для вебхука
     web.run_app(app, host="0.0.0.0", port=80)
 
 if __name__ == "__main__":
