@@ -5,7 +5,7 @@ from aiogram.filters import CommandStart
 import asyncio
 
 # Укажите ваш токен бота
-BOT_TOKEN = "YOUR_BOT_TOKEN"
+BOT_TOKEN = "7945799403:AAGcc9M7l5J44V8FIcicudeUQXyqJFh87Ss"
 
 # ID канала для проверки подписки
 CHECK_CHANNEL = "@YourChannel"
