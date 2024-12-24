@@ -48,7 +48,7 @@ async def check_subscription(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
     try:
         # Проверка подписки по юзернейму канала (первый параметр - это @канал)
-        member = await bot.get_chat_member(chat_id="Nuqor", user_id=user_id)
+        member = await bot.get_chat_member(chat_id="@Nuqor", user_id=user_id)
 
         if member.status in ["member", "administrator", "creator"]:
             # Если пользователь подписан
