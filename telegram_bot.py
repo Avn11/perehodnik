@@ -1,27 +1,54 @@
+import asyncio
+import logging
+import requests
 from aiogram import Bot, Dispatcher, types
-from aiogram.utils import executor
-from aiogram.types import ParseMode
-import re
 
-API_TOKEN = '7860834182:AAH-12wehh4eYfJyr6uVXQp9xa19g5cKq8c'
-SOURCE_CHAT_ID = -100123456789  # ID группы-источника
-TARGET_CHAT_ID = -100987654321  # ID группы, куда пересылаются сообщения
-OLD_BOT_USERNAME = '@OLD_BOT'   # Имя старого бота
-NEW_BOT_USERNAME = '@XBOTROBOT' # Имя нового бота
+# Твой Telegram-токен
+TOKEN = "7860834182:AAH-12wehh4eYfJyr6uVXQp9xa19g5cKq8c"
 
-bot = Bot(token=API_TOKEN)
+# API-ключи (если нужны)
+DEXTON_API_URL = "https://api.dexton.io/v1/tokens"
+HEADERS = {"Authorization": "ТВОЙ_API_КЛЮЧ"}
+
+# Создаем бота и диспетчер
+bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
 
-@dp.message_handler(chat_id=SOURCE_CHAT_ID)
-async def forward_and_replace(message: types.Message):
-    # Заменяем старого бота на нового
-    new_text = re.sub(re.escape(OLD_BOT_USERNAME), NEW_BOT_USERNAME, message.text)
-    
-    # Добавляем плашку
-    new_text += "\n\nПокупка через @XBOTROBOT"
+# Функция для получения новых токенов
+async def get_new_tokens():
+    try:
+        response = requests.get(DEXTON_API_URL, headers=HEADERS)
+        data = response.json()
 
-    # Отправляем сообщение в целевую группу
-    await bot.send_message(chat_id=TARGET_CHAT_ID, text=new_text, parse_mode=ParseMode.HTML)
+        new_tokens = []
+        for token in data:
+            if token["liquidity"] > 10000 and token["holders"] > 50:
+                new_tokens.append(
+                    f"🔥 Новый токен найден: {token['name']} ({token['symbol']})\n"
+                    f"📌 Контракт: {token['contract_address']}\n"
+                    f"💰 Ликвидность: {token['liquidity']} TON\n"
+                    f"👥 Холдеры: {token['holders']}\n"
+                    f"📊 Объем: {token['volume']} TON"
+                )
 
-if __name__ == '__main__':
-    executor.start_polling(dp, skip_updates=True)
+        return new_tokens
+    except Exception as e:
+        logging.error(f"Ошибка получения токенов: {e}")
+        return []
+
+# Функция для отправки сообщений
+async def send_alerts():
+    while True:
+        new_tokens = await get_new_tokens()
+        for token in new_tokens:
+            await bot.send_message("ТВОЙ_CHAT_ID", token)
+        await asyncio.sleep(60)  # Проверка раз в минуту
+
+# Запуск бота
+async def main():
+    asyncio.create_task(send_alerts())
+    await dp.start_polling()
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+    asyncio.run(main())
