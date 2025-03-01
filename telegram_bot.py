@@ -95,5 +95,5 @@ async def main():
 
 # === ЗАПУСК БОТА ===
 if __name__ == "__main__":
-    asyncio.run(main())
+asyncio.run(main())
 ​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​
