@@ -41,7 +41,7 @@ async def send_alerts():
     while True:
         new_tokens = await get_new_tokens()
         for token in new_tokens:
-            await bot.send_message("ТВОЙ_CHAT_ID", token)
+            await bot.send_message("860729820", token)
         await asyncio.sleep(60)  # Проверка раз в минуту
 
 # Запуск бота
