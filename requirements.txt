@@ -1,1 +1,3 @@
-pip install aiogram requests scikit-learn
+aiogram
+requests
+scikit-learn
